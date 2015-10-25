@@ -168,17 +168,10 @@ class Pif2fwPacket:
             raise "trying to get elements of a pif2fw packet before it was created."
         return self._elements
 
-    def getResultSize(self):
-        resultSize = 0
-        for element in self._elements:
-            print "adding %d to result size" % element.getResultSize()
-            resultSize = resultSize + element.getResultSize()
-        return resultSize
-
     def display(self):
         if self._elements == None:
             raise "trying to display a pif2fw packet before it was created."
-        print "Pif2fwPacket: result_size=%d" % (self.getResultSize())
+        print "Pif2fwPacket:"
         for element in self._elements:
             element.display()
         
@@ -213,13 +206,15 @@ class Pif2fwHeader:
             raise "trying to get fwheader sequence type before the header was parsed"
         return self._sequence_type
     
+    def getSequenceId(self):
+        if self._sequence_id == None:
+            raise "trying to get fwheader sequence id before the header was parsed"
+        return self._sequence_id
+
     def getSequenceLength(self):
         if self._sequence_length == None:
             raise "trying to get fwheader sequence length before the header was parsed"
         return self._sequence_length
-
-    def getResultSize(self):
-        return 0
 
     def display(self):
         print "pif2fw header: sequence_type=%s, sequence_id=%d, sequence_length=%d" % (self._sequence_type, self._sequence_id, self._sequence_length)
@@ -258,12 +253,6 @@ class Pif2fwPayload:
         if self._operations == None:
             raise "trying to get operations from fw payload before the payload was created"
         return self._operations
-
-    def getResultSize(self):
-        resultSize = 1   # 1: fw status byte
-        for operation in self._operations:
-            resultSize = resultSize + operation.getResultSize()
-        return resultSize
 
     def display(self):
         for operation in self._operations:
@@ -318,6 +307,7 @@ while (index != len(bytes)):
     if index > len(bytes):
         raise "index error"
   
+fwpackets = []
  
 for hwpacket in hwpackets:
     print "## HWPACKET ##"
@@ -330,7 +320,52 @@ for hwpacket in hwpackets:
                 pif2fwpacket = Pif2fwPacket()
                 pif2fwpacket.createFromHwPayload(element)
                 pif2fwpacket.display()
+                fwpackets.append(pif2fwpacket)
 
+sequence = []
+for i in range(0,16):
+    sequence.append(None)
 
+def printSequences():
+    for i in range(0,16):
+        resultSize = 0
+        if sequence[i] == None:
+            print "sequence[%d] -- UNUSED" % (i)
+        else:
+            for operation in sequence[i]:
+                resultSize = resultSize + operation.getResultSize()
+            print "sequence[%d] -- result size = %d" % (i, resultSize)
+    
+def processFwPacket(fwpacket):
+    sequenceId = None
+    packetResultSize = 0
+    for element in fwpacket.getElements():
+        if isinstance(element, Pif2fwHeader):
+            sequenceResultSize = 0
+            if element.getSequenceType() == 'post':
+                sequenceId = element.getSequenceId()
+                sequenceResultSize = 1
+            elif element.getSequenceType() == 'get':
+                for operation in sequence[element.getSequenceId()]:
+                    sequenceResultSize = sequenceResultSize + operation.getResultSize()
+            packetResultSize = packetResultSize + sequenceResultSize
+        elif isinstance(element, Pif2fwPayload):
+            sequence[sequenceId] = element.getOperations()
+            sequenceId = None
+        else:
+            raise "illegal element in Pif2fwPacket"
 
-## TODO: check fwpayload size against hw payload size
+def getCyclicMemoryUsage():
+    cyclicMemoryUsage = 0
+    for i in range(0,16):
+        if sequence[i] == None:
+            continue
+        for operation in sequence[i]:
+            cyclicMemoryUsage = cyclicMemoryUsage + operation.getByteSize() + operation.getResultSize()
+    return cyclicMemoryUsage
+    
+
+for fwpacket in fwpackets:
+    processFwPacket(fwpacket)
+    print getCyclicMemoryUsage()
+
