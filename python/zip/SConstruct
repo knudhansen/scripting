@@ -1,0 +1,20 @@
+env=Environment()
+
+import zipfile
+def unzip_emitter(target, source, env):
+    zipFile = zipfile.ZipFile(source[0].get_path(), 'r')
+    for name in  zipFile.namelist():
+        if name[-1] == '/':
+            pass
+        else:
+            target.append('%s/%s' % (env['EXTRACT_DIR'],name))
+    print target
+    return (target, source)
+
+env['BUILDERS']['Unzip'] = Builder(action=['unzip $SOURCE -d $EXTRACT_DIR'],
+                                   emitter=unzip_emitter
+                                   )
+
+env.Unzip('temp.zip',
+          EXTRACT_DIR='extract',
+         )
