@@ -1,0 +1,14 @@
+env = Environment()
+
+def unzip_emitter(target, source, env):
+    import zipfile
+    zipFile = zipfile.ZipFile(source[0].get_abspath(),'r')
+    for file in zipFile.infolist():
+        if file.filename[-1] != '/':
+            target.append(file.filename)
+    return (target, source)
+
+bld = Builder(action='unzip $SOURCE',emitter=unzip_emitter)
+env['BUILDERS']['Unzip'] = bld
+
+env.Unzip('test.zip')
