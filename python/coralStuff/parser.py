@@ -1,6 +1,18 @@
 import argparse
 import sys
 
+# The scripts relies on:
+# - the first line of the table containing the dates of the observations.
+# - the only acceptable text in the first column passed the 2 first line is 'Platine', which is ignored, or a platine name.
+# - empty dates should have less than 7 columns. Those are totally ignored.
+# - every data on a 'platine' to have a platine name in the first row of the first line of the observation.
+# - the data tables do start on a fix column relative to the observation dates in first row (observation data column + 2).
+# - the data tables always having the 'dessus', 'bords', 'dessous', 'Total' in that order.
+# - the data tables have a Total line after the family lines.
+# - the data tables (with the different families and the different positions) does not have empty lines.
+#   An empty line is considered as the end of the data. Further data will be ignored until a new platine is detected in first column.
+# - there is an empty line under the data before other tables are added. The tables below the data are ignored.
+# - all data for a given 
 parser = argparse.ArgumentParser(prog='PROG')
 parser.add_argument('-i', '--input', required=True, help='input file')
 parser.add_argument('-l', '--location', help='location from where the samples where collected', default='')
@@ -83,9 +95,9 @@ for observation in dataSeries['observations']:
             if positionTotalsCalc[position] != positionTotalsRead[position]:
                 sys.stderr.write("ERROR: position total error for %s -- read %d, expected %d\n" % (position, positionTotalsRead[position], positionTotalsCalc[position]))
 
-print "%s, %s, %s, %s, %s, %s" % ('date', 'location', 'depth', 'plaque', 'famille', 'nombre')
+print "%s, %s, %s, %s, %s, %s, %s" % ('date', 'location', 'depth', 'platine', 'plaque', 'famille', 'nombre')
 for observation in dataSeries['observations']:
     for data in observation['data']:
         for famille in data['familles']:
             if famille['name'] != 'Total':
-                print "%s, %s, %s, %s, %s, %d" % (observation['date'], args.location, args.depth, data['plaque'], famille['name'],famille['total'])
+                print "%s, %s, %s, %s, %s, %s, %d" % (observation['date'], args.location, args.depth, data['platine'], data['plaque'], famille['name'],famille['total'])
