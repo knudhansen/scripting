@@ -83,8 +83,9 @@ for observation in dataSeries['observations']:
             if positionTotalsCalc[position] != positionTotalsRead[position]:
                 sys.stderr.write("ERROR: position total error for %s -- read %d, expected %d\n" % (position, positionTotalsRead[position], positionTotalsCalc[position]))
 
+print "%s, %s, %s, %s, %s, %s" % ('date', 'location', 'depth', 'plaque', 'famille', 'nombre')
 for observation in dataSeries['observations']:
     for data in observation['data']:
         for famille in data['familles']:
             if famille['name'] != 'Total':
-                print "%s, %s, %s, %s, %s,%d" % (observation['date'], args.location, args.depth, data['plaque'], famille['name'],famille['total'])
+                print "%s, %s, %s, %s, %s, %d" % (observation['date'], args.location, args.depth, data['plaque'], famille['name'],famille['total'])
