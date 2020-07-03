@@ -65,13 +65,25 @@ for row in input.readlines():
                 famille['positions']['dessous'] = 0
                 famille['total'] = 0
                 if columns[observation['scol']+3]:
-                    famille['positions']['dessus'] = int(columns[observation['scol']+3])
+                    try:
+                        famille['positions']['dessus'] = int(columns[observation['scol']+3])
+                    except ValueError:
+                        famille['positions']['dessus'] = 0
                 if columns[observation['scol']+4]:
-                    famille['positions']['bord'] = int(columns[observation['scol']+4])
+                    try:
+                        famille['positions']['bord'] = int(columns[observation['scol']+4])
+                    except ValueError:
+                        famille['positions']['bord'] = 0
                 if columns[observation['scol']+5]:
-                    famille['positions']['dessous'] = int(columns[observation['scol']+5])
+                    try:
+                        famille['positions']['dessous'] = int(columns[observation['scol']+5])
+                    except ValueError:
+                        famille['positions']['dessous'] = 0
                 if columns[observation['scol']+6]:
-                    famille['total'] = int(columns[observation['scol']+6])
+                    try:
+                        famille['total'] = int(columns[observation['scol']+6])
+                    except ValueError:
+                        famille['total'] = 0
             elif len(observation['data']) > 0 and not columns[observation['scol']+2]:
                 ## finish capturing on empty 
                 observation['data'][-1]['done'] = True
