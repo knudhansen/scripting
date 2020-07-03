@@ -82,7 +82,7 @@ for observation in dataSeries['observations']:
         positionTotalsRead = {'dessus': 0, 'bord': 0, 'dessous': 0}
         for famille in data['familles']:
             if famille['total']!=famille['positions']['dessus']+famille['positions']['bord']+famille['positions']['dessous']:
-                sys.stderr.write("ERROR: family total error for %s -- read %d, expected %d\n" % (famille['name'], famille['total'], famille['positions']['dessus']+famille['positions']['bord']+famille['positions']['dessous']))
+                sys.stderr.write("ERROR: family total error for (%s: %s: %s: %s) -- read %d, expected %d\n" % (observation['date'], data['platine'], data['plaque'], famille['name'], famille['total'], famille['positions']['dessus']+famille['positions']['bord']+famille['positions']['dessous']))
             if famille['name'] != 'Total':
                 positionTotalsCalc['dessus']  = positionTotalsCalc['dessus']  + famille['positions']['dessus']
                 positionTotalsCalc['bord']    = positionTotalsCalc['bord']    + famille['positions']['bord']
@@ -93,7 +93,7 @@ for observation in dataSeries['observations']:
                 positionTotalsRead['dessous'] = famille['positions']['dessous']
         for position in ['dessus', 'bord', 'dessous']:
             if positionTotalsCalc[position] != positionTotalsRead[position]:
-                sys.stderr.write("ERROR: position total error for %s -- read %d, expected %d\n" % (position, positionTotalsRead[position], positionTotalsCalc[position]))
+                sys.stderr.write("ERROR: position total error for (%s: %s: %s: %s:%s) -- read %d, expected %d\n" % (observation['date'], data['platine'], data['plaque'], famille['name'], position, positionTotalsRead[position], positionTotalsCalc[position]))
 
 print "%s, %s, %s, %s, %s, %s, %s" % ('date', 'location', 'depth', 'platine', 'plaque', 'famille', 'nombre')
 for observation in dataSeries['observations']:
