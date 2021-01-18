@@ -207,4 +207,6 @@ try:
             print("RESET at %s" % csvSignalChange.getTime())
 except MemoryError:
     sys.stderr.write("\nMemoryError at %s\n" % fullTime)
+except IndexError:
+    sys.stderr.write("\nIndexError at %s\n" % fullTime)
 sys.stderr.write("\n")
